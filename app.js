@@ -5,12 +5,15 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import indexRouter from './routes/index.js';
+import authRouter from './routes/authentication.js';
 import usersRouter from './routes/users.js';
+import chatsRouter from './routes/chats.js';
 
 const app = express();
 
-const mongoDb = process.env.DATABASE_URL;
+const mongoDb =
+  process.env.DATABASE_URL ||
+  'mongodb+srv://benjlong50:KO8jSqCklgRvbftG@cluster0.figbmxw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(mongoDb);
 const db = mongoose.connection;
@@ -23,7 +26,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(import.meta.dirname, 'public')));
 
 app.use(cors());
+app.use('/', authRouter);
 app.use('/', usersRouter);
+app.use('/', chatsRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
