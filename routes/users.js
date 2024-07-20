@@ -5,7 +5,7 @@ import authController from '../controllers/authController.js';
 
 const router = express.Router();
 
-router.get('/users', cors(), userController.listUsers);
+router.get('/users', cors(), userController.getUsers);
 
 router.get(
   '/users/:userId/chats',
@@ -19,6 +19,13 @@ router.get(
   cors(),
   authController.verifyToken,
   userController.getFriends,
+);
+
+router.put(
+  '/users/:userId/friends',
+  cors(),
+  authController.verifyToken,
+  userController.addFriend,
 );
 
 export default router;

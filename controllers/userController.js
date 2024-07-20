@@ -4,8 +4,8 @@ import { body, validationResult } from 'express-validator';
 import User from '../models/user.js';
 
 const userController = {
-  listUsers: asyncHandler(async (req, res) => {
-    const users = await User.find();
+  getUsers: asyncHandler(async (req, res) => {
+    const users = await User.find().sort('username');
     res.json(users);
   }),
 
@@ -77,9 +77,29 @@ const userController = {
     }
   }),
 
-  showUser: asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    res.json(user);
+  addFriend: asyncHandler(async (req, res) => {
+    try {
+      if (req.body.newFriendId !== req.params.userId) {
+        await User.findByIdAndUpdate(
+          req.body.newFriendId,
+          { $addToSet: { friends: req.params.userId } },
+          { new: true },
+        );
+
+        await User.findByIdAndUpdate(
+          req.params.userId,
+          { $addToSet: { friends: req.body.newFriendId } },
+          { new: true },
+        );
+      } else {
+        res
+          .status(400)
+          .json({ message: 'You cannot add yourself as a friend' });
+      }
+      res.status(200).json({ message: 'Added friend' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error adding friend' });
+    }
   }),
 
   deleteUser: asyncHandler(async (req, res) => {

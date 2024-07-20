@@ -33,4 +33,11 @@ router.put(
   chatController.updateChatMembers,
 );
 
+router.delete(
+  '/chats/:chatId',
+  cors(),
+  authController.verifyToken,
+  chatController.deleteChat,
+);
+
 export default router;

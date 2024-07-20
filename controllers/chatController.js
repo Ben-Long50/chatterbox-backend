@@ -10,7 +10,6 @@ const chatController = {
 
     asyncHandler(async (req, res) => {
       const errors = validationResult(req);
-      console.log(errors);
       if (!errors.isEmpty()) {
         res.status(400).json(errors.array());
       } else {
@@ -28,9 +27,9 @@ const chatController = {
             { new: true },
           );
 
-          res.status(200).json({ message: 'chat created' });
+          res.status(200).json({ message: 'Chat created' });
         } catch (error) {
-          res.status(500).json({ message: 'Error creating chat' });
+          res.status(400).json({ message: 'Error creating chat' });
         }
       }
     }),
@@ -49,7 +48,7 @@ const chatController = {
         .exec();
       res.status(200).json({ name: chat.name, messages: chat.messages });
     } catch (error) {
-      res.status(500).json({ message: 'Error getting global chat messages' });
+      res.status(400).json({ message: 'Error getting global chat messages' });
     }
   }),
 
@@ -78,7 +77,7 @@ const chatController = {
 
           res.status(200).json({ message: 'Message submitted' });
         } catch (error) {
-          res.status(500).json({ message: 'Error submitting message' });
+          res.status(400).json({ message: 'Error submitting message' });
         }
       }
     }),
@@ -97,9 +96,24 @@ const chatController = {
         { new: true },
       );
 
-      res.status(200).json({ message: 'Friend added' });
+      res.status(200).json({ message: 'Friend added to chat' });
     } catch (error) {
-      res.status(500).json({ message: 'Error adding friend' });
+      res.status(400).json({ message: 'Error adding friend to chat' });
+    }
+  }),
+
+  deleteChat: asyncHandler(async (req, res) => {
+    try {
+      const chat = await Chat.findById(req.body.chatId);
+      await Message.deleteMany({ _id: { $in: chat.messages } });
+      await Chat.findByIdAndDelete(req.body.chatId);
+      await User.updateMany(
+        { chats: req.body.chatId },
+        { $pull: { chats: req.body.chatId } },
+      );
+      res.status(200).json({ message: 'Chat deleted' });
+    } catch (error) {
+      res.status(400).json({ message: 'Error deleting chat' });
     }
   }),
 };
