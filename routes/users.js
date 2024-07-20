@@ -28,4 +28,11 @@ router.put(
   userController.addFriend,
 );
 
+router.delete(
+  '/users/:userId/friends',
+  cors(),
+  authController.verifyToken,
+  userController.removeFriend,
+);
+
 export default router;

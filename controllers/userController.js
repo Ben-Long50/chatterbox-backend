@@ -62,7 +62,7 @@ const userController = {
         .exec();
       res.status(200).json(userChats.chats);
     } catch (error) {
-      res.status(500).json({ message: 'Error getting user chats' });
+      res.status(400).json({ message: 'Error getting user chats' });
     }
   }),
 
@@ -73,7 +73,7 @@ const userController = {
         .exec();
       res.status(200).json(userFriends.friends);
     } catch (error) {
-      res.status(500).json({ message: 'Error getting friends' });
+      res.status(400).json({ message: 'Error getting friends' });
     }
   }),
 
@@ -98,7 +98,26 @@ const userController = {
       }
       res.status(200).json({ message: 'Added friend' });
     } catch (error) {
-      res.status(500).json({ message: 'Error adding friend' });
+      res.status(400).json({ message: 'Error adding friend' });
+    }
+  }),
+
+  removeFriend: asyncHandler(async (req, res) => {
+    try {
+      await User.findByIdAndUpdate(
+        req.body.friendId,
+        { $pull: { friends: req.params.userId } },
+        { new: true },
+      );
+
+      await User.findByIdAndUpdate(
+        req.params.userId,
+        { $pull: { friends: req.body.friendId } },
+        { new: true },
+      );
+      res.status(200).json({ message: 'Removed friend' });
+    } catch (error) {
+      res.status(400).json({ message: 'Error removing friend' });
     }
   }),
 
