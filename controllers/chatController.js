@@ -45,8 +45,13 @@ const chatController = {
             model: 'User',
           },
         })
+        .populate('members')
         .exec();
-      res.status(200).json({ name: chat.name, messages: chat.messages });
+      res.status(200).json({
+        name: chat.name,
+        messages: chat.messages,
+        members: chat.members,
+      });
     } catch (error) {
       res.status(400).json({ message: 'Error getting global chat messages' });
     }

@@ -59,6 +59,13 @@ const userController = {
     try {
       const userChats = await User.findById(req.params.userId)
         .populate('chats')
+        .populate({
+          path: 'chats',
+          populate: {
+            path: 'members',
+            model: 'User',
+          },
+        })
         .exec();
       res.status(200).json(userChats.chats);
     } catch (error) {
