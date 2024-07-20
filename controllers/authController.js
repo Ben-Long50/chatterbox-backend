@@ -42,7 +42,7 @@ const authController = {
         jwt.sign(
           { user },
           process.env.SESSION_KEY || 'cats',
-          { expiresIn: '1h' },
+          { expiresIn: '8h' },
           (err, token) => {
             if (err) {
               res.status(500).json({ message: 'Error generating token' });

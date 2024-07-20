@@ -66,6 +66,17 @@ const userController = {
     }
   }),
 
+  getFriends: asyncHandler(async (req, res) => {
+    try {
+      const userFriends = await User.findById(req.params.userId)
+        .populate('friends')
+        .exec();
+      res.status(200).json(userFriends.friends);
+    } catch (error) {
+      res.status(500).json({ message: 'Error getting friends' });
+    }
+  }),
+
   showUser: asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.userId);
     res.json(user);

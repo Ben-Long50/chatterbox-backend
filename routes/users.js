@@ -14,4 +14,11 @@ router.get(
   userController.getChats,
 );
 
+router.get(
+  '/users/:userId/friends',
+  cors(),
+  authController.verifyToken,
+  userController.getFriends,
+);
+
 export default router;

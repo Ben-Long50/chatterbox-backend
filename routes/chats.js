@@ -26,4 +26,11 @@ router.post(
   chatController.postMessage,
 );
 
+router.put(
+  '/chats/:chatId/members',
+  cors(),
+  authController.verifyToken,
+  chatController.updateChatMembers,
+);
+
 export default router;

@@ -76,13 +76,32 @@ const chatController = {
             { new: true },
           );
 
-          res.status(200).json({ message: 'message submitted' });
+          res.status(200).json({ message: 'Message submitted' });
         } catch (error) {
           res.status(500).json({ message: 'Error submitting message' });
         }
       }
     }),
   ],
+
+  updateChatMembers: asyncHandler(async (req, res) => {
+    try {
+      const chat = await Chat.findByIdAndUpdate(
+        req.params.chatId,
+        { $addToSet: { members: req.body.friendId } },
+        { new: true },
+      );
+      await User.findByIdAndUpdate(
+        req.body.friendId,
+        { $addToSet: { chats: chat._id } },
+        { new: true },
+      );
+
+      res.status(200).json({ message: 'Friend added' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error adding friend' });
+    }
+  }),
 };
 
 export default chatController;
