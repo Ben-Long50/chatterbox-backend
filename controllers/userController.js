@@ -7,8 +7,18 @@ import Chat from '../models/chat.js';
 
 const userController = {
   getUsers: asyncHandler(async (req, res) => {
-    const users = await User.find().sort('username');
-    res.json(users);
+    try {
+      const currentUser = await User.findById(req.query.userId)
+        .populate('friends')
+        .exec();
+      const friendIds = currentUser.friends.map((friend) => friend._id);
+      const users = await User.find({
+        _id: { $nin: [req.query.userId, ...friendIds] },
+      }).sort('username');
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: 'Error getting users' });
+    }
   }),
 
   createUser: [

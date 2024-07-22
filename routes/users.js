@@ -5,7 +5,12 @@ import authController from '../controllers/authController.js';
 
 const router = express.Router();
 
-router.get('/users', cors(), userController.getUsers);
+router.get(
+  '/users',
+  cors(),
+  authController.verifyToken,
+  userController.getUsers,
+);
 
 router.get(
   '/users/:userId/chats',
