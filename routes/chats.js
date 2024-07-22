@@ -40,4 +40,10 @@ router.delete(
   chatController.deleteChat,
 );
 
+router.delete(
+  '/chats/:chatId/messages/:messageId',
+  cors(),
+  authController.verifyToken,
+  chatController.deleteMessage,
+);
 export default router;

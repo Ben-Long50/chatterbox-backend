@@ -2,6 +2,8 @@ import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
 import User from '../models/user.js';
+import Message from '../models/message.js';
+import Chat from '../models/chat.js';
 
 const userController = {
   getUsers: asyncHandler(async (req, res) => {
@@ -75,10 +77,10 @@ const userController = {
 
   getFriends: asyncHandler(async (req, res) => {
     try {
-      const userFriends = await User.findById(req.params.userId)
+      const user = await User.findById(req.params.userId)
         .populate('friends')
         .exec();
-      res.status(200).json(userFriends.friends);
+      res.status(200).json(user.friends);
     } catch (error) {
       res.status(400).json({ message: 'Error getting friends' });
     }
@@ -125,6 +127,68 @@ const userController = {
       res.status(200).json({ message: 'Removed friend' });
     } catch (error) {
       res.status(400).json({ message: 'Error removing friend' });
+    }
+  }),
+
+  getBestFriends: asyncHandler(async (req, res) => {
+    try {
+      const user = await User.findById(req.params.userId)
+        .populate('friends chats')
+        .exec();
+      const friendIds = user.friends.map((friend) => friend._id.toString());
+      const userChatRoomIds = user.chats.slice(1).map((room) => room._id);
+
+      const sharedChatRooms = await Chat.find({
+        _id: { $in: userChatRoomIds },
+        $and: [{ members: req.params.userId }, { members: { $in: friendIds } }],
+      })
+        .populate({
+          path: 'messages',
+          populate: {
+            path: 'author',
+            model: 'User',
+          },
+        })
+        .exec();
+      // Extract all messages from the shared chat rooms
+      const allMessages = sharedChatRooms.reduce(
+        (acc, room) => acc.concat(room.messages),
+        [],
+      );
+
+      // Aggregate messages to count the number sent by each friend
+      const messageCounts = {};
+      allMessages.forEach((message) => {
+        const authorId = message.author._id.toString();
+        if (friendIds.includes(authorId)) {
+          if (!messageCounts[authorId]) {
+            messageCounts[authorId] = 0;
+          }
+          messageCounts[authorId]++;
+        }
+      });
+
+      const bestFriendsWithMessageCount = Object.entries(messageCounts)
+        .map(([id, count]) => ({ friendId: id, totalMessages: count }))
+        .sort((a, b) => b.totalMessages - a.totalMessages);
+
+      const bestFriends = await User.find({
+        _id: { $in: bestFriendsWithMessageCount.map((f) => f.friendId) },
+      }).exec();
+
+      const result = bestFriends.map((friend) => {
+        const messageData = bestFriendsWithMessageCount.find(
+          (f) => f.friendId === friend._id.toString(),
+        );
+        return {
+          friend,
+          totalMessages: messageData ? messageData.totalMessages : 0,
+        };
+      });
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ message: 'Failed to get best friends' });
     }
   }),
 

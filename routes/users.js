@@ -21,6 +21,13 @@ router.get(
   userController.getFriends,
 );
 
+router.get(
+  '/users/:userId/friends/best',
+  cors(),
+  authController.verifyToken,
+  userController.getBestFriends,
+);
+
 router.put(
   '/users/:userId/friends',
   cors(),

@@ -6,6 +6,9 @@ const UserSchema = new Schema({
   image: { type: String },
   chats: [{ type: Schema.Types.ObjectId, ref: 'Chat' }],
   friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  profile: {
+    bio: { type: String },
+  },
 });
 
 export default mongoose.model('User', UserSchema);

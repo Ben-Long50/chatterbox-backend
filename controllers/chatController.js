@@ -121,6 +121,18 @@ const chatController = {
       res.status(400).json({ message: 'Error deleting chat' });
     }
   }),
+
+  deleteMessage: asyncHandler(async (req, res) => {
+    try {
+      await Message.findByIdAndDelete(req.params.messageId);
+      await Chat.findByIdAndUpdate(req.params.chatId, {
+        $pull: { messages: req.params.messageId },
+      });
+      res.status(200).json({ message: 'Message deleted' });
+    } catch (error) {
+      res.status(400).json({ message: 'Error deleting message' });
+    }
+  }),
 };
 
 export default chatController;
