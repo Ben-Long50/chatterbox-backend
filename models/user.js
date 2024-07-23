@@ -5,6 +5,7 @@ const UserSchema = new Schema({
   password: { type: String, required: true },
   image: { type: String },
   chats: [{ type: Schema.Types.ObjectId, ref: 'Chat' }],
+  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
   friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   profile: {
     bio: { type: String },

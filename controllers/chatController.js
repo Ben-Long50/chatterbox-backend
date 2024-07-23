@@ -74,6 +74,12 @@ const chatController = {
 
           message.save();
 
+          await User.findByIdAndUpdate(
+            req.body.author,
+            { $push: { messages: message } },
+            { new: true },
+          );
+
           await Chat.findByIdAndUpdate(
             req.params.chatId,
             { $push: { messages: message } },
@@ -126,6 +132,9 @@ const chatController = {
     try {
       await Message.findByIdAndDelete(req.params.messageId);
       await Chat.findByIdAndUpdate(req.params.chatId, {
+        $pull: { messages: req.params.messageId },
+      });
+      await User.findByIdAndUpdate(req.body.userId, {
         $pull: { messages: req.params.messageId },
       });
       res.status(200).json({ message: 'Message deleted' });
