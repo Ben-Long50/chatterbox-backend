@@ -14,7 +14,9 @@ const userController = {
       const friendIds = currentUser.friends.map((friend) => friend._id);
       const users = await User.find({
         _id: { $nin: [req.query.userId, ...friendIds] },
-      }).sort('username');
+      })
+        .populate('friends')
+        .sort('username');
       res.status(200).json(users);
     } catch (error) {
       res.status(500).json({ message: 'Error getting users' });
@@ -88,7 +90,13 @@ const userController = {
   getFriends: asyncHandler(async (req, res) => {
     try {
       const user = await User.findById(req.params.userId)
-        .populate('friends')
+        .populate({
+          path: 'friends',
+          populate: {
+            path: 'friends',
+            model: 'User',
+          },
+        })
         .exec();
       res.status(200).json(user.friends);
     } catch (error) {
@@ -184,7 +192,9 @@ const userController = {
 
       const bestFriends = await User.find({
         _id: { $in: bestFriendsWithMessageCount.map((f) => f.friendId) },
-      }).exec();
+      })
+        .populate('friends')
+        .exec();
 
       const result = bestFriends.map((friend) => {
         const messageData = bestFriendsWithMessageCount.find(
