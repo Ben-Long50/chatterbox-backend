@@ -12,7 +12,7 @@ import usersRouter from './routes/users.js';
 import chatsRouter from './routes/chats.js';
 
 const app = express();
-const server = http.createServer(app); // Create an HTTP server
+const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
     origin: 'http://localhost:5173', // Replace with your front-end URL
