@@ -5,11 +5,20 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 import authRouter from './routes/authentication.js';
 import usersRouter from './routes/users.js';
 import chatsRouter from './routes/chats.js';
 
 const app = express();
+const server = http.createServer(app); // Create an HTTP server
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: 'http://localhost:5173', // Replace with your front-end URL
+    methods: ['GET', 'POST'],
+  },
+});
 
 const mongoDb =
   process.env.DATABASE_URL ||
@@ -30,6 +39,30 @@ app.use('/', authRouter);
 app.use('/', usersRouter);
 app.use('/', chatsRouter);
 
+// WebSocket event handlers
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('joinChat', (chatId) => {
+    socket.join(chatId);
+    console.log(`User joined chat room ${chatId}`);
+  });
+
+  socket.on('newMessage', (message) => {
+    io.to(message.chatId).emit('newMessage', message);
+    console.log(`Message sent to chat room ${message.chatId}`);
+  });
+
+  socket.on('deletedMessage', (data) => {
+    io.to(data.chatId).emit('deletedMessage', data.messageId);
+    console.log(`Message deleted from chat room ${data.chatId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));
@@ -46,4 +79,5 @@ app.use((err, req, res, next) => {
   res.render('error');
 });
 
+export { server, io };
 export default app;

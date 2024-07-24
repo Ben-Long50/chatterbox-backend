@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import Chat from '../models/chat.js';
 import Message from '../models/message.js';
 import User from '../models/user.js';
+import { io } from '../app.js';
 
 const chatController = {
   createChat: [
@@ -74,6 +75,8 @@ const chatController = {
 
           message.save();
 
+          const author = await User.findById(req.body.author);
+
           await User.findByIdAndUpdate(
             req.body.author,
             { $push: { messages: message } },
@@ -86,7 +89,15 @@ const chatController = {
             { new: true },
           );
 
-          res.status(200).json({ message: 'Message submitted' });
+          io.to(req.params.chatId).emit('newMessage', {
+            ...message.toObject(),
+            author: {
+              _id: author._id,
+              username: author.username,
+            },
+          });
+
+          res.status(200).json({ message });
         } catch (error) {
           res.status(400).json({ message: 'Error submitting message' });
         }
@@ -137,6 +148,11 @@ const chatController = {
       await User.findByIdAndUpdate(req.body.userId, {
         $pull: { messages: req.params.messageId },
       });
+
+      io.to(req.params.chatId).emit('deletedMessage', {
+        messageId: req.params.messageId,
+      });
+
       res.status(200).json({ message: 'Message deleted' });
     } catch (error) {
       res.status(400).json({ message: 'Error deleting message' });
