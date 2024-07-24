@@ -13,6 +13,20 @@ router.get(
 );
 
 router.get(
+  '/users/:userId',
+  cors(),
+  authController.verifyToken,
+  userController.getUser,
+);
+
+router.put(
+  '/users/:userId',
+  cors(),
+  authController.verifyToken,
+  userController.updateUser,
+);
+
+router.get(
   '/users/:userId/chats',
   cors(),
   authController.verifyToken,

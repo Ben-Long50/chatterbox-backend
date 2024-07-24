@@ -6,6 +6,17 @@ import Message from '../models/message.js';
 import Chat from '../models/chat.js';
 
 const userController = {
+  getUser: asyncHandler(async (req, res) => {
+    try {
+      const user = await User.findById(req.params.userId)
+        .populate('friends')
+        .exec();
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Error getting user' });
+    }
+  }),
+
   getUsers: asyncHandler(async (req, res) => {
     try {
       const currentUser = await User.findById(req.query.userId)
@@ -209,6 +220,19 @@ const userController = {
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({ message: 'Failed to get best friends' });
+    }
+  }),
+
+  updateUser: asyncHandler(async (req, res) => {
+    try {
+      await User.findByIdAndUpdate(
+        req.params.userId,
+        { username: req.body.username, profile: { bio: req.body.bio } },
+        { new: true },
+      );
+      res.status(200).json({ message: 'Profile updated' });
+    } catch (error) {
+      res.status(400).json(error);
     }
   }),
 
