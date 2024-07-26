@@ -15,9 +15,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: 'http://localhost:5173', // Replace with your front-end URL
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'DELETE'],
   },
+  pingInterval: 10000,
+  pingTimeout: 5000,
 });
 
 const mongoDb =
