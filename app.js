@@ -15,8 +15,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin:
-      'https://66a3423eeb570f00084a773b--chatterbox-messenger.netlify.app',
+    origin: 'https://main--chatterbox-messenger.netlify.app',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
 });
