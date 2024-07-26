@@ -145,7 +145,7 @@ const userController = {
         );
         io.emit('removeMember', newFriend);
         io.emit('addFriend', newFriend);
-        console.log(newFriend);
+
         res.status(200).json({ message: 'Added friend' });
       } else {
         res
