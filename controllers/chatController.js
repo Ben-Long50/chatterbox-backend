@@ -127,11 +127,16 @@ const chatController = {
   deleteChat: asyncHandler(async (req, res) => {
     try {
       const chat = await Chat.findById(req.body.chatId);
+      const messageIds = chat.messages;
       await Message.deleteMany({ _id: { $in: chat.messages } });
       await Chat.findByIdAndDelete(req.body.chatId);
       await User.updateMany(
         { chats: req.body.chatId },
         { $pull: { chats: req.body.chatId } },
+      );
+      await User.updateMany(
+        { messages: { $in: messageIds } },
+        { $pull: { messages: { $in: messageIds } } },
       );
       res.status(200).json({ message: 'Chat deleted' });
     } catch (error) {

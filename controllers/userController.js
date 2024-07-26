@@ -5,6 +5,19 @@ import User from '../models/user.js';
 import Message from '../models/message.js';
 import Chat from '../models/chat.js';
 
+const deleteChatById = async (chatId) => {
+  try {
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+
+    await Chat.findByIdAndDelete(chatId);
+  } catch (error) {
+    throw error;
+  }
+};
+
 const userController = {
   getUser: asyncHandler(async (req, res) => {
     try {
@@ -72,7 +85,7 @@ const userController = {
         const user = new User({
           username: req.body.username,
           password: hashedPassword,
-          chats: ['66999af0d7e2908c706b637d'],
+          chats: ['66a305269cda21178b7bf604'],
         });
         await user.save();
         res.status(200).json({ message: 'Sign up successful' });
@@ -162,62 +175,54 @@ const userController = {
   getBestFriends: asyncHandler(async (req, res) => {
     try {
       const user = await User.findById(req.params.userId)
-        .populate('friends chats')
-        .exec();
-      const friendIds = user.friends.map((friend) => friend._id.toString());
-      const userChatRoomIds = user.chats.slice(1).map((room) => room._id);
-
-      const sharedChatRooms = await Chat.find({
-        _id: { $in: userChatRoomIds },
-        $and: [{ members: req.params.userId }, { members: { $in: friendIds } }],
-      })
+        .populate('chats')
         .populate({
-          path: 'messages',
+          path: 'friends',
           populate: {
-            path: 'author',
-            model: 'User',
+            path: 'chats',
+            model: 'Chat',
+            populate: {
+              path: 'messages',
+              model: 'Message',
+            },
           },
         })
         .exec();
-      // Extract all messages from the shared chat rooms
-      const allMessages = sharedChatRooms.reduce(
-        (acc, room) => acc.concat(room.messages),
-        [],
-      );
+      const userChatIds = user.chats.map((chat) => chat._id.toString());
 
-      // Aggregate messages to count the number sent by each friend
-      const messageCounts = {};
-      allMessages.forEach((message) => {
-        const authorId = message.author._id.toString();
-        if (friendIds.includes(authorId)) {
-          if (!messageCounts[authorId]) {
-            messageCounts[authorId] = 0;
+      const sharedData = user.friends.map((friend) => {
+        const sharedChats = friend.chats.filter((chat) => {
+          if (
+            userChatIds.includes(chat._id.toString()) &&
+            chat.name !== 'Global'
+          ) {
+            return chat;
           }
-          messageCounts[authorId]++;
-        }
-      });
+        });
 
-      const bestFriendsWithMessageCount = Object.entries(messageCounts)
-        .map(([id, count]) => ({ friendId: id, totalMessages: count }))
-        .sort((a, b) => b.totalMessages - a.totalMessages);
-
-      const bestFriends = await User.find({
-        _id: { $in: bestFriendsWithMessageCount.map((f) => f.friendId) },
-      })
-        .populate('friends')
-        .exec();
-
-      const result = bestFriends.map((friend) => {
-        const messageData = bestFriendsWithMessageCount.find(
-          (f) => f.friendId === friend._id.toString(),
+        const messagesInChats = sharedChats.reduce(
+          (acc, chat) => acc.concat(chat.messages),
+          [],
         );
+        console.log(messagesInChats);
+        const messageCount = messagesInChats.filter((message) => {
+          if (
+            message.author.toString() === req.params.userId.toString() ||
+            message.author.toString() === friend._id.toString()
+          ) {
+            return message;
+          }
+        });
         return {
-          friend,
-          totalMessages: messageData ? messageData.totalMessages : 0,
+          friendName: friend.username,
+          friendId: friend._id,
+          count: messageCount.length,
         };
       });
 
-      res.status(200).json(result);
+      const sortedData = sharedData.sort((a, b) => b.count - a.count);
+
+      res.status(200).json(sortedData);
     } catch (error) {
       res.status(400).json({ message: 'Failed to get best friends' });
     }
@@ -237,7 +242,29 @@ const userController = {
   }),
 
   deleteUser: asyncHandler(async (req, res) => {
-    await User.findByIdAndDelete(req.params.userId);
+    console.log(1);
+    try {
+      const user = await User.findById(req.params.userId).select('messages');
+      const messageIds = user.messages;
+
+      await Message.deleteMany({ _id: { $in: messageIds } });
+
+      await User.findByIdAndDelete(req.params.userId);
+
+      await User.updateMany({}, { $pull: { friends: req.params.userId } });
+
+      await Chat.updateMany({}, { $pull: { members: req.params.userId } });
+
+      await Chat.updateMany({}, { $pull: { messages: { $in: messageIds } } });
+
+      const emptyChats = await Chat.find({ members: { $size: 0 } });
+
+      await Promise.all(emptyChats.map((chat) => deleteChatById(chat._id)));
+
+      res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+      res.status(400).json(error);
+    }
   }),
 };
 

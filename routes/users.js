@@ -26,6 +26,12 @@ router.put(
   userController.updateUser,
 );
 
+router.delete(
+  '/users/:userId',
+  authController.verifyToken,
+  userController.deleteUser,
+);
+
 router.get(
   '/users/:userId/chats',
   cors(),
