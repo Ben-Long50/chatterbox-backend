@@ -138,13 +138,13 @@ const userController = {
           { new: true },
         );
 
-        await User.findByIdAndUpdate(
+        const user = await User.findByIdAndUpdate(
           req.params.userId,
           { $addToSet: { friends: req.body.newFriendId } },
           { new: true },
         );
-        io.emit('removeMember', newFriend);
-        io.emit('addFriend', newFriend);
+        io.emit('removeMember', { newFriend, user });
+        io.emit('addFriend', { newFriend, user });
 
         res.status(200).json({ message: 'Added friend' });
       } else {
@@ -165,14 +165,14 @@ const userController = {
         { new: true },
       );
 
-      await User.findByIdAndUpdate(
+      const user = await User.findByIdAndUpdate(
         req.params.userId,
         { $pull: { friends: req.body.friendId } },
         { new: true },
       );
 
-      io.emit('addMember', oldFriend);
-      io.emit('removeFriend', oldFriend);
+      io.emit('addMember', { oldFriend, user });
+      io.emit('removeFriend', { oldFriend, user });
 
       res.status(200).json({ message: 'Removed friend' });
     } catch (error) {
