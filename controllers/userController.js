@@ -4,6 +4,7 @@ import { body, validationResult } from 'express-validator';
 import User from '../models/user.js';
 import Message from '../models/message.js';
 import Chat from '../models/chat.js';
+import { io } from '../app.js';
 
 const deleteChatById = async (chatId) => {
   try {
@@ -131,7 +132,7 @@ const userController = {
   addFriend: asyncHandler(async (req, res) => {
     try {
       if (req.body.newFriendId !== req.params.userId) {
-        await User.findByIdAndUpdate(
+        const newFriend = await User.findByIdAndUpdate(
           req.body.newFriendId,
           { $addToSet: { friends: req.params.userId } },
           { new: true },
@@ -142,12 +143,15 @@ const userController = {
           { $addToSet: { friends: req.body.newFriendId } },
           { new: true },
         );
+        io.emit('removeMember', newFriend);
+        io.emit('addFriend', newFriend);
+
+        res.status(200).json({ message: 'Added friend' });
       } else {
         res
           .status(400)
           .json({ message: 'You cannot add yourself as a friend' });
       }
-      res.status(200).json({ message: 'Added friend' });
     } catch (error) {
       res.status(400).json({ message: 'Error adding friend' });
     }
@@ -155,7 +159,7 @@ const userController = {
 
   removeFriend: asyncHandler(async (req, res) => {
     try {
-      await User.findByIdAndUpdate(
+      const oldFriend = await User.findByIdAndUpdate(
         req.body.friendId,
         { $pull: { friends: req.params.userId } },
         { new: true },
@@ -166,6 +170,10 @@ const userController = {
         { $pull: { friends: req.body.friendId } },
         { new: true },
       );
+
+      io.emit('addMember', oldFriend);
+      io.emit('removeFriend', oldFriend);
+
       res.status(200).json({ message: 'Removed friend' });
     } catch (error) {
       res.status(400).json({ message: 'Error removing friend' });
