@@ -6,16 +6,16 @@ import logger from 'morgan';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
+import { Server } from 'socket.io';
 import authRouter from './routes/authentication.js';
 import usersRouter from './routes/users.js';
 import chatsRouter from './routes/chats.js';
 
 const app = express();
 const server = http.createServer(app);
-const io = new SocketIOServer(server, {
+const io = new Server(server, {
   cors: {
-    origin: 'https://main--chatterbox-messenger.netlify.app',
+    origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
   pingInterval: 10000,
