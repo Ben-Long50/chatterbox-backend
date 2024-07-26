@@ -18,6 +18,8 @@ const io = new SocketIOServer(server, {
     origin: 'https://main--chatterbox-messenger.netlify.app',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
+  pingInterval: 10000,
+  pingTimeout: 5000,
 });
 
 const mongoDb = process.env.DATABASE_URL;
