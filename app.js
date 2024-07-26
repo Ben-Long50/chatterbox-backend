@@ -13,7 +13,7 @@ import chatsRouter from './routes/chats.js';
 
 const app = express();
 const server = http.createServer(app);
-const io = new SocketIOServer(server, {
+const io = new Server(server, {
   connectionStateRecovery: {
     maxDisconnectionDuration: 2 * 60 * 1000,
     skipMiddlewares: true,
