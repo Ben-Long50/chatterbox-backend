@@ -14,9 +14,13 @@ import chatsRouter from './routes/chats.js';
 const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  },
   cors: {
     origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'DELETE'],
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
   pingInterval: 10000,
   pingTimeout: 5000,
