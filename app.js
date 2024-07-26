@@ -15,14 +15,12 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: 'http://localhost:5173', // Replace with your front-end URL
-    methods: ['GET', 'POST', 'DELETE'],
+    origin: 'https://main--chatterbox-messenger.netlify.app/', // Replace with your front-end URL
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
 });
 
-const mongoDb =
-  process.env.DATABASE_URL ||
-  'mongodb+srv://benjlong50:KO8jSqCklgRvbftG@cluster0.figbmxw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const mongoDb = process.env.DATABASE_URL;
 
 mongoose.connect(mongoDb);
 const db = mongoose.connection;
