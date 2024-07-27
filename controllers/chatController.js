@@ -143,6 +143,10 @@ const chatController = {
         { new: true },
       );
 
+      const emptyChats = await Chat.find({ members: { $size: 0 } });
+
+      await Promise.all(emptyChats.map((item) => deleteChatById(item._id)));
+
       io.emit('removeFromChat', { chat, user });
 
       res.status(200).json({ message: 'Member removed from chat' });
@@ -193,6 +197,19 @@ const chatController = {
       res.status(400).json({ message: 'Error deleting message' });
     }
   }),
+};
+
+const deleteChatById = async (chatId) => {
+  try {
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+
+    await Chat.findByIdAndDelete(chatId);
+  } catch (error) {
+    throw error;
+  }
 };
 
 export default chatController;

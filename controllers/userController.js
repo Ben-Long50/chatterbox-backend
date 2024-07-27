@@ -6,19 +6,6 @@ import Message from '../models/message.js';
 import Chat from '../models/chat.js';
 import { io } from '../app.js';
 
-const deleteChatById = async (chatId) => {
-  try {
-    const chat = await Chat.findById(chatId);
-    if (!chat) {
-      throw new Error('Chat not found');
-    }
-
-    await Chat.findByIdAndDelete(chatId);
-  } catch (error) {
-    throw error;
-  }
-};
-
 const userController = {
   getUser: asyncHandler(async (req, res) => {
     try {
@@ -272,6 +259,19 @@ const userController = {
       res.status(400).json(error);
     }
   }),
+};
+
+const deleteChatById = async (chatId) => {
+  try {
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+
+    await Chat.findByIdAndDelete(chatId);
+  } catch (error) {
+    throw error;
+  }
 };
 
 export default userController;
