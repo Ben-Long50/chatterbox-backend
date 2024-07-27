@@ -129,6 +129,28 @@ const chatController = {
     }
   }),
 
+  removeFromChat: asyncHandler(async (req, res) => {
+    try {
+      const chat = await Chat.findByIdAndUpdate(
+        req.params.chatId,
+        { $pull: { members: req.body.memberId } },
+        { new: true },
+      );
+
+      const user = await User.findByIdAndUpdate(
+        req.body.memberId,
+        { $pull: { chats: chat._id } },
+        { new: true },
+      );
+
+      io.emit('removeFromChat', { chat, user });
+
+      res.status(200).json({ message: 'Member removed from chat' });
+    } catch (error) {
+      res.status(400).json({ message: 'Error adding friend to chat' });
+    }
+  }),
+
   deleteChat: asyncHandler(async (req, res) => {
     try {
       const chat = await Chat.findById(req.body.chatId);
