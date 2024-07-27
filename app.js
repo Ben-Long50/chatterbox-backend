@@ -26,9 +26,7 @@ const io = new Server(server, {
   pingTimeout: 5000,
 });
 
-const mongoDb =
-  process.env.DATABASE_URL ||
-  'mongodb+srv://benjlong50:KO8jSqCklgRvbftG@cluster0.figbmxw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const mongoDb = process.env.DATABASE_URL;
 
 mongoose.connect(mongoDb);
 const db = mongoose.connection;
