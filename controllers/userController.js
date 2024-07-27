@@ -86,7 +86,7 @@ const userController = {
         const user = new User({
           username: req.body.username,
           password: hashedPassword,
-          chats: ['66a305269cda21178b7bf604'],
+          chats: [process.env.GLOBAL_CHAT],
         });
         await user.save();
         res.status(200).json({ message: 'Sign up successful' });
