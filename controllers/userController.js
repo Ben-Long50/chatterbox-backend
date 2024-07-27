@@ -212,7 +212,6 @@ const userController = {
           (acc, chat) => acc.concat(chat.messages),
           [],
         );
-        console.log(messagesInChats);
         const messageCount = messagesInChats.filter((message) => {
           if (
             message.author.toString() === req.params.userId.toString() ||
@@ -250,7 +249,6 @@ const userController = {
   }),
 
   deleteUser: asyncHandler(async (req, res) => {
-    console.log(1);
     try {
       const user = await User.findById(req.params.userId).select('messages');
       const messageIds = user.messages;

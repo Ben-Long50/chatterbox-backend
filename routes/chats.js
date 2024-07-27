@@ -27,6 +27,13 @@ router.post(
 );
 
 router.put(
+  '/chats/:chatId',
+  cors(),
+  authController.verifyToken,
+  chatController.removeFromChat,
+);
+
+router.put(
   '/chats/:chatId/members',
   cors(),
   authController.verifyToken,
