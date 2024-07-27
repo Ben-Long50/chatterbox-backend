@@ -47,7 +47,7 @@ const authController = {
             if (err) {
               res.status(500).json({ message: 'Error generating token' });
             }
-            res.json({
+            res.status(200).json({
               token,
             });
           },

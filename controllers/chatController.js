@@ -111,12 +111,15 @@ const chatController = {
         req.params.chatId,
         { $addToSet: { members: req.body.friendId } },
         { new: true },
-      );
+      ).populate('members');
+
       await User.findByIdAndUpdate(
         req.body.friendId,
         { $addToSet: { chats: chat._id } },
         { new: true },
       );
+
+      io.emit('addToChat', chat);
 
       res.status(200).json({ message: 'Friend added to chat' });
     } catch (error) {
