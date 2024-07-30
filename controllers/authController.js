@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import asyncHandler from 'express-async-handler';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
