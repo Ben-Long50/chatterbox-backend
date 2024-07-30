@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
@@ -26,9 +27,7 @@ const io = new Server(server, {
   pingTimeout: 5000,
 });
 
-const mongoDb =
-  process.env.DATABASE_URL ||
-  'mongodb+srv://benjlong50:KO8jSqCklgRvbftG@cluster0.figbmxw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const mongoDb = process.env.DATABASE_URL;
 
 mongoose.connect(mongoDb);
 const db = mongoose.connection;

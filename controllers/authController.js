@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import asyncHandler from 'express-async-handler';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
@@ -41,7 +42,7 @@ const authController = {
         const user = await User.findOne({ username: req.body.username });
         jwt.sign(
           { user },
-          process.env.SESSION_KEY || 'cats',
+          process.env.SESSION_KEY,
           { expiresIn: '4h' },
           (err, token) => {
             if (err) {
@@ -61,7 +62,7 @@ const authController = {
     if (typeof bearerHeader !== 'undefined') {
       const bearerToken = bearerHeader.split(' ')[1];
       req.token = bearerToken;
-      jwt.verify(req.token, process.env.SESSION_KEY || 'cats', (err) => {
+      jwt.verify(req.token, process.env.SESSION_KEY, (err) => {
         if (err) {
           res.sendStatus(403);
         } else {
