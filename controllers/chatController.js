@@ -157,6 +157,9 @@ const chatController = {
 
   deleteChat: asyncHandler(async (req, res) => {
     try {
+      if (req.body.chatId === process.env.GLOBAL_CHAT_ID) {
+        throw new Error('Cannot delete global chat');
+      }
       const chat = await Chat.findById(req.body.chatId);
       const messageIds = chat.messages;
       await Message.deleteMany({ _id: { $in: chat.messages } });
