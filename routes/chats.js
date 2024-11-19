@@ -7,6 +7,12 @@ const router = express.Router();
 router.post('/chats', authController.verifyToken, chatController.createChat);
 
 router.get(
+  '/chats/global',
+  authController.verifyToken,
+  chatController.getGlobalChat,
+);
+
+router.get(
   '/chats/:chatId',
   authController.verifyToken,
   chatController.getChat,

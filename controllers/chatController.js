@@ -38,6 +38,15 @@ const chatController = {
     }),
   ],
 
+  getGlobalChat: async (req, res) => {
+    try {
+      const chat = await Chat.findOne({ name: 'Global' });
+      res.status(200).json(chat);
+    } catch (error) {
+      res.status(400).json({ message: 'Error getting global chat messages' });
+    }
+  },
+
   getChat: asyncHandler(async (req, res) => {
     try {
       const chat = await Chat.findById(req.params.chatId)
@@ -131,15 +140,17 @@ const chatController = {
 
   removeFromChat: asyncHandler(async (req, res) => {
     try {
+      console.log(req.body.memberId);
+
       const chat = await Chat.findByIdAndUpdate(
-        req.params.chatId,
+        req.body.chatId,
         { $pull: { members: req.body.memberId } },
         { new: true },
       );
 
       const user = await User.findByIdAndUpdate(
         req.body.memberId,
-        { $pull: { chats: chat._id } },
+        { $pull: { chats: req.body.chatId } },
         { new: true },
       );
 
