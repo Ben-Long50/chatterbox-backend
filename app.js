@@ -20,11 +20,11 @@ const io = new Server(server, {
     skipMiddlewares: true,
   },
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'DELETE', 'PUT'],
+    origin: process.env.CLIENT_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   },
   pingInterval: 10000,
-  pingTimeout: 5000,
+  pingTimeout: 60 * 1000,
 });
 
 const mongoDb = process.env.DATABASE_URL;
