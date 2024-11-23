@@ -118,23 +118,31 @@ const chatController = {
 
   updateChatMembers: asyncHandler(async (req, res) => {
     try {
-      const chat = await Chat.findByIdAndUpdate(
-        req.params.chatId,
-        { $addToSet: { members: req.body.friendId } },
-        { new: true },
-      ).populate('members');
+      const chat = await Chat.findById(req.params.chatId);
 
-      const user = await User.findByIdAndUpdate(
-        req.body.friendId,
-        { $addToSet: { chats: chat._id } },
-        { new: true },
-      );
+      if (chat.name !== 'Global') {
+        const updatedChat = await Chat.findByIdAndUpdate(
+          req.params.chatId,
+          { $addToSet: { members: req.body.friendId } },
+          { new: true },
+        ).populate('members');
 
-      io.emit('addToChat', { chat, user });
+        const user = await User.findByIdAndUpdate(
+          req.body.friendId,
+          { $addToSet: { chats: chat._id } },
+          { new: true },
+        );
 
-      res.status(200).json({ message: 'Friend added to chat' });
+        io.emit('addToChat', { updatedChat, user });
+
+        res.status(200).json({ message: 'Friend added to chat' });
+      } else {
+        throw new Error('Cannot add friends to the Global chat');
+      }
     } catch (error) {
-      res.status(400).json({ message: 'Error adding friend to chat' });
+      res
+        .status(400)
+        .json({ message: error.message || 'Error adding friend to chat' });
     }
   }),
 
