@@ -28,6 +28,7 @@ const userController = {
         _id: { $nin: [req.query.userId, ...friendIds] },
       })
         .populate('friends')
+        .collation({ locale: 'en', strength: 2 })
         .sort('username');
       res.status(200).json(users);
     } catch (error) {
@@ -110,7 +111,12 @@ const userController = {
           },
         })
         .exec();
-      res.status(200).json(user.friends);
+
+      const sortedFriends = user.friends.sort((a, b) =>
+        a.username.toLowerCase().localeCompare(b.username.toLowerCase()),
+      );
+
+      res.status(200).json(sortedFriends);
     } catch (error) {
       res.status(400).json({ message: 'Error getting friends' });
     }
