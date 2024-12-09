@@ -4,8 +4,6 @@ import authController from '../controllers/authController.js';
 
 const router = express.Router();
 
-router.post('/chats', authController.verifyToken, chatController.createChat);
-
 router.get(
   '/chats/global',
   authController.verifyToken,
@@ -18,8 +16,10 @@ router.get(
   chatController.getChat,
 );
 
+router.post('/chats', authController.verifyToken, chatController.createChat);
+
 router.post(
-  '/chats/:chatId',
+  '/chats/:chatId/messages',
   authController.verifyToken,
   chatController.postMessage,
 );

@@ -12,18 +12,6 @@ router.get(
   userController.getUser,
 );
 
-router.put(
-  '/users/:userId',
-  authController.verifyToken,
-  userController.updateUser,
-);
-
-router.delete(
-  '/users/:userId',
-  authController.verifyToken,
-  userController.deleteUser,
-);
-
 router.get(
   '/users/:userId/chats',
   authController.verifyToken,
@@ -43,9 +31,21 @@ router.get(
 );
 
 router.put(
+  '/users/:userId',
+  authController.verifyToken,
+  userController.updateUser,
+);
+
+router.put(
   '/users/:userId/friends',
   authController.verifyToken,
   userController.addFriend,
+);
+
+router.delete(
+  '/users/:userId',
+  authController.verifyToken,
+  userController.deleteUser,
 );
 
 router.delete(
