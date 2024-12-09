@@ -8,8 +8,8 @@ router.get('/status', (req, res) =>
   res.status(200).json({ message: 'Service is running' }),
 );
 
-router.post('/users/signup', userController.createUser);
+router.post('/auth/signup', userController.createUser);
 
-router.post('/users/signin', authController.userSignin);
+router.post('/auth/signin', authController.userSignin);
 
 export default router;

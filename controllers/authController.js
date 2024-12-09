@@ -37,7 +37,7 @@ const authController = {
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
-        res.status(400).json(errors.array());
+        res.status(400).json({ errors: errors.array() });
       } else {
         const user = await User.findOne({ username: req.body.username });
         jwt.sign(
@@ -64,13 +64,15 @@ const authController = {
       req.token = bearerToken;
       jwt.verify(req.token, process.env.SESSION_KEY, (err) => {
         if (err) {
-          res.sendStatus(403);
+          res
+            .status(403)
+            .json({ message: 'Authentication missing or expired' });
         } else {
           next();
         }
       });
     } else {
-      res.sendStatus(403);
+      res.status(403).json({ message: 'Authentication missing or expired' });
     }
   },
 };

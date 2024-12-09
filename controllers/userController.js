@@ -68,7 +68,7 @@ const userController = {
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
-        res.status(400).json(errors.array());
+        res.status(400).json({ errors: errors.array() });
       } else {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const user = new User({
